@@ -16,23 +16,49 @@ import {
   FormLabel,
   Input,
   useToast,
+  VStack,
+  HStack,
+  Divider,
+  IconButton,
 } from "@chakra-ui/react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updateUser } from "../../store/slices/authSlice";
+import { FiEdit2 } from "react-icons/fi";
 
 const Profile = () => {
   const user = useSelector((state: RootState) => state.auth.user);
+  console.log("Redux user state:", user); // Debug log for Redux state
   const dispatch = useDispatch();
   const toast = useToast();
+  const [isEditing, setIsEditing] = useState(false);
 
+  // Initialize form data with empty strings
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
+    name: "",
+    email: "",
     phone: "",
     address: "",
   });
+
+  // Update form data when user data changes
+  useEffect(() => {
+    if (user) {
+      console.log("Setting form data with user data:", {
+        name: user.name,
+        email: user.email, // Log email specifically
+        phone: user.mobileNumber,
+        address: user.address,
+      });
+      setFormData({
+        name: user.name || "",
+        email: user.email || "", // Make sure email is being set
+        phone: user.mobileNumber || "",
+        address: user.address || "",
+      });
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -46,14 +72,18 @@ const Profile = () => {
     e.preventDefault();
 
     try {
-      // TODO: Implement profile update API call
-      const response = await fetch("http://localhost:3000/api/users/profile", {
+      const response = await fetch("http://localhost:5000/api/users/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          mobileNumber: formData.phone,
+          address: formData.address,
+        }),
       });
 
       const data = await response.json();
@@ -63,8 +93,10 @@ const Profile = () => {
       }
 
       dispatch(updateUser(data));
+      setIsEditing(false);
       toast({
         title: "Profile updated",
+        description: "Your personal information has been updated successfully",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -80,6 +112,23 @@ const Profile = () => {
       });
     }
   };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    // Reset form data to current user data
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.mobileNumber || "",
+        address: user.address || "",
+      });
+    }
+  };
+
+  // Add debug log before return
+  console.log("Current form data:", formData);
+  console.log("Current user data:", user);
 
   if (!user) {
     return <Text>Please log in to view your profile</Text>;
@@ -101,6 +150,49 @@ const Profile = () => {
             <Heading size="md">{user.name}</Heading>
             <Text color="gray.500">{user.role}</Text>
           </Box>
+
+          {/* Display Personal Information in Sidebar */}
+          <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+            <VStack align="start" spacing={4}>
+              <Heading size="sm" color="gray.600">
+                Personal Information
+              </Heading>
+              <VStack align="start" spacing={3} width="100%">
+                <Box width="100%">
+                  <Text fontSize="sm" color="gray.500">
+                    Email
+                  </Text>
+                  <Text fontWeight="medium">
+                    {user.email || "No email provided"}
+                  </Text>
+                </Box>
+                <Box width="100%">
+                  <Text fontSize="sm" color="gray.500">
+                    Mobile Number
+                  </Text>
+                  <Text fontWeight="medium">{user.mobileNumber}</Text>
+                </Box>
+                <Box width="100%">
+                  <Text fontSize="sm" color="gray.500">
+                    Address
+                  </Text>
+                  <Text fontWeight="medium">{user.address}</Text>
+                </Box>
+                <Divider />
+                <Box width="100%">
+                  <Text fontSize="sm" color="gray.500">
+                    Driver's License Number
+                  </Text>
+                  <Text fontWeight="medium" color="blue.600">
+                    {user.licenseNumber}
+                  </Text>
+                  <Text fontSize="xs" color="gray.400" mt={1}>
+                    (This information cannot be edited)
+                  </Text>
+                </Box>
+              </VStack>
+            </VStack>
+          </Box>
         </Stack>
 
         {/* Main Content */}
@@ -115,55 +207,82 @@ const Profile = () => {
             <TabPanels>
               {/* Profile Tab */}
               <TabPanel p={6}>
-                <form onSubmit={handleSubmit}>
-                  <Stack spacing={6}>
-                    <Heading size="md" mb={4}>
-                      Personal Information
-                    </Heading>
-                    <Grid
-                      templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
-                      gap={6}
-                    >
-                      <FormControl>
-                        <FormLabel>Full Name</FormLabel>
-                        <Input
-                          name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>Email</FormLabel>
-                        <Input
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          type="email"
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>Phone</FormLabel>
-                        <Input
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          type="tel"
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel>Address</FormLabel>
-                        <Input
-                          name="address"
-                          value={formData.address}
-                          onChange={handleChange}
-                        />
-                      </FormControl>
-                    </Grid>
-                    <Button type="submit" colorScheme="blue">
-                      Save Changes
-                    </Button>
-                  </Stack>
-                </form>
+                <Stack spacing={6}>
+                  <HStack justify="space-between" align="center">
+                    <Heading size="md">Personal Information</Heading>
+                    {!isEditing && (
+                      <Button
+                        leftIcon={<FiEdit2 />}
+                        colorScheme="blue"
+                        variant="outline"
+                        onClick={() => setIsEditing(true)}
+                      >
+                        Edit Profile
+                      </Button>
+                    )}
+                  </HStack>
+                  <form onSubmit={handleSubmit}>
+                    <Stack spacing={6}>
+                      <Grid
+                        templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+                        gap={6}
+                      >
+                        <FormControl>
+                          <FormLabel>Full Name</FormLabel>
+                          <Input
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            isReadOnly={!isEditing}
+                            bg={!isEditing ? "gray.50" : "white"}
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel>Email</FormLabel>
+                          <Input
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            type="email"
+                            isReadOnly={!isEditing}
+                            bg={!isEditing ? "gray.50" : "white"}
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel>Phone</FormLabel>
+                          <Input
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            type="tel"
+                            isReadOnly={!isEditing}
+                            bg={!isEditing ? "gray.50" : "white"}
+                          />
+                        </FormControl>
+                        <FormControl>
+                          <FormLabel>Address</FormLabel>
+                          <Input
+                            name="address"
+                            value={formData.address}
+                            onChange={handleChange}
+                            isReadOnly={!isEditing}
+                            bg={!isEditing ? "gray.50" : "white"}
+                          />
+                        </FormControl>
+                      </Grid>
+                      {isEditing && (
+                        <HStack spacing={4} justify="flex-end">
+                          <Button variant="outline" onClick={handleCancel}>
+                            Cancel
+                          </Button>
+                          <Button type="submit" colorScheme="blue">
+                            Save Changes
+                          </Button>
+                        </HStack>
+                      )}
+                    </Stack>
+                  </form>
+                </Stack>
               </TabPanel>
 
               {/* My Cars Tab */}

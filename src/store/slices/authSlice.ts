@@ -2,9 +2,16 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface User {
   id: string
-  email: string
   name: string
-  role: 'owner' | 'renter'
+  email: string
+  mobileNumber: string
+  address: string
+  driversLicenseUrl: {
+    front: string
+    back: string
+  }
+  licenseNumber: string
+  role: string
 }
 
 interface AuthState {
