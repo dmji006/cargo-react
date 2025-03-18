@@ -1,20 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const { body } = require('express-validator');
-const validate = require('../middleware/validate.middleware');
+const carController = require('../controllers/car.controller');
+const authMiddleware = require('../middleware/auth.middleware');
 
-// TODO: Add car controller functions
-const carController = {
-    listCars: async (req, res) => {
-        try {
-            res.json({ message: "Car listing route working" });
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    }
-};
+// All routes require authentication
+router.use(authMiddleware);
 
-// Routes
-router.get('/', carController.listCars);
+// Create a new car listing
+router.post('/', carController.createCar);
+
+// Get all cars for the logged-in user
+router.get('/my-cars', carController.getUserCars);
+
+// Get a specific car by ID
+router.get('/:id', carController.getCarById);
+
+// Update a car listing
+router.put('/:id', carController.updateCar);
+
+// Delete a car listing
+router.delete('/:id', carController.deleteCar);
 
 module.exports = router; 

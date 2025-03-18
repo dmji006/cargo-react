@@ -11,6 +11,7 @@ dotenv.config();
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const carRoutes = require('./routes/car.routes');
+const uploadRoutes = require('./routes/upload.routes');
 
 const app = express();
 
@@ -50,6 +51,7 @@ global.pool = pool;
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cars', carRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -10,6 +10,7 @@ const CarListing = lazy(() => import("./pages/cars/CarListing"));
 const CarDetails = lazy(() => import("./pages/cars/CarDetails"));
 const Profile = lazy(() => import("./pages/profile/Profile"));
 const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
+const MyCars = lazy(() => import("./components/MyCars"));
 
 const LoadingSpinner = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minH="60vh">
@@ -26,6 +27,7 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/cars" element={<CarListing />} />
         <Route path="/cars/:id" element={<CarDetails />} />
+        <Route path="/my-cars" element={<MyCars />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
