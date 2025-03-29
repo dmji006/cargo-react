@@ -24,7 +24,6 @@ import {
 import { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { loginSuccess } from "../../store/slices/authSlice";
 import { FiUploadCloud } from "react-icons/fi";
 import Swal from "sweetalert2";
 
@@ -316,20 +315,17 @@ const Register = () => {
         throw new Error(data.message || "Registration failed");
       }
 
-      // Dispatch login action with the user data
-      dispatch(loginSuccess(data.data));
-
       // Show success message
       await Swal.fire({
         title: "Success!",
-        text: "Your account has been created successfully!",
+        text: "Your account has been created successfully! Please log in.",
         icon: "success",
         timer: 2000,
         showConfirmButton: false,
       });
 
-      // Navigate to profile page
-      navigate("/profile");
+      // Navigate to login page instead of profile
+      navigate("/login");
     } catch (error) {
       Swal.fire({
         title: "Registration Failed",

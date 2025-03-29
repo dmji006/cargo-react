@@ -81,8 +81,8 @@ const Login = () => {
         isClosable: true,
       });
 
-      // Redirect to profile page
-      navigate("/profile");
+      // Redirect to home page
+      navigate("/");
     } catch (error) {
       const errorMessage =
         error instanceof Error
