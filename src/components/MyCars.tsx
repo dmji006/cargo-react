@@ -81,10 +81,10 @@ interface NewCar {
   model: string;
   year: string;
   seats: string;
-  fuelType: string;
+  fuel_type: string;
   transmission: string;
-  price: string;
   description: string;
+  price_per_day: string;
 }
 
 const MyCars = () => {
@@ -106,9 +106,9 @@ const MyCars = () => {
     model: "",
     year: "",
     seats: "",
-    fuelType: "",
+    fuel_type: "",
     transmission: "",
-    price: "",
+    price_per_day: "",
     description: "",
   });
 
@@ -133,27 +133,22 @@ const MyCars = () => {
   };
 
   const handleInputChange = (
-    e:
-      | React.ChangeEvent<
-          HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-        >
-      | string,
-    name?: string
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
-    if (typeof e === "string" && name) {
-      // Handle NumberInput changes
-      setNewCar((prev) => ({
-        ...prev,
-        [name]: e,
-      }));
-    } else if (typeof e === "object") {
-      // Handle regular input changes
-      const { name, value } = e.target;
-      setNewCar((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    const { name, value } = e.target;
+    setNewCar((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleNumberInputChange = (valueString: string, name: string) => {
+    setNewCar((prev) => ({
+      ...prev,
+      [name]: valueString,
+    }));
   };
 
   const uploadImages = async (files: File[]): Promise<string[]> => {
@@ -229,7 +224,7 @@ const MyCars = () => {
       // Then create car listing
       const carData = {
         ...newCar,
-        price: parseFloat(newCar.price),
+        price: parseFloat(newCar.price_per_day),
         seats: parseInt(newCar.seats, 10),
         images: imageUrls,
       };
@@ -252,9 +247,9 @@ const MyCars = () => {
         model: "",
         year: "",
         seats: "",
-        fuelType: "",
+        fuel_type: "",
         transmission: "",
-        price: "",
+        price_per_day: "",
         description: "",
       });
       setImageFiles([]);
@@ -309,7 +304,7 @@ const MyCars = () => {
   };
 
   const PostCarForm = () => (
-    <form onSubmit={(e) => e.preventDefault()}>
+    <form onSubmit={handleSubmit}>
       <VStack spacing={4}>
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} width="100%">
           <FormControl isRequired>
@@ -349,7 +344,7 @@ const MyCars = () => {
                 name="seats"
                 value={newCar.seats}
                 onChange={(valueString) =>
-                  handleInputChange(valueString, "seats")
+                  handleNumberInputChange(valueString, "seats")
                 }
                 placeholder="e.g., 5"
               />
@@ -361,8 +356,8 @@ const MyCars = () => {
           <FormControl isRequired>
             <FormLabel>Type of Gasoline</FormLabel>
             <Select
-              name="fuelType"
-              value={newCar.fuelType}
+              name="fuel_type"
+              value={newCar.fuel_type}
               onChange={handleInputChange}
               placeholder="Select fuel type"
             >
@@ -391,10 +386,10 @@ const MyCars = () => {
           <FormLabel>Price per Day (USD)</FormLabel>
           <NumberInput min={0}>
             <NumberInputField
-              name="price"
-              value={newCar.price}
+              name="price_per_day"
+              value={newCar.price_per_day}
               onChange={(valueString) =>
-                handleInputChange(valueString, "price")
+                handleNumberInputChange(valueString, "price_per_day")
               }
               placeholder="e.g., 50"
             />
@@ -457,6 +452,15 @@ const MyCars = () => {
         </FormControl>
 
         {uploadProgress > 0 && <Progress value={uploadProgress} width="100%" />}
+
+        <Button
+          type="submit"
+          colorScheme="blue"
+          width="100%"
+          isLoading={isLoading}
+        >
+          Post Car
+        </Button>
       </VStack>
     </form>
   );
@@ -483,13 +487,6 @@ const MyCars = () => {
             <ModalFooter>
               <Button variant="ghost" mr={3} onClick={onClose}>
                 Cancel
-              </Button>
-              <Button
-                colorScheme="blue"
-                onClick={handleSubmit}
-                isLoading={isLoading}
-              >
-                Post Car
               </Button>
             </ModalFooter>
           </ModalContent>
